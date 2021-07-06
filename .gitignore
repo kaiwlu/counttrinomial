@@ -1,3 +1,8 @@
 .DS_*
 .vs*
-
+*.csv
+*.exe
+*.o
+*.out
+*.jpg
+*.nb
