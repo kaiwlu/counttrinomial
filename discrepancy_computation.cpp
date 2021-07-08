@@ -19,6 +19,7 @@ using std::set;
 const double pi = std::acos(-1);
 const complex<double> ii(0, 1);
 
+// Computes the bound for discrepancy for specific m
 inline double discrepancy(int p, int c, int d, int m)
 {
    vector<double> val_set(p, 0);
@@ -41,6 +42,7 @@ inline double discrepancy(int p, int c, int d, int m)
    return disc;
 }
 
+// Computes the minimum bound for discrepancy assuming it is a valley
 double min_discrepancy(int p, int c, int d)
 {
    int left = 6, right = 2*p;
@@ -73,7 +75,7 @@ void discrepancy_pc(int p)
    set<int> expd;
    while (expd.size() < (unsigned int)p/5)
    {
-      expd.insert(rand() % (p - 4) + 3); // c ranging from 3 to P - 2
+      expd.insert(rand() % (p - 4) + 3); // d ranging from 3 to P - 2
    }
    for (int d : expd)
    {
