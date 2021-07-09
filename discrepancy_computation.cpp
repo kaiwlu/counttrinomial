@@ -1,10 +1,8 @@
 #include <complex>
-#include <vector>
 #include <iostream>
 #include <fstream>
 #include <set>
 #include <stdlib.h>
-#include <math.h>
 #include <string>
 
 #include "common.h"
@@ -91,6 +89,28 @@ void discrepancy_pc(int p)
    rec.close();
 }
 
+void discrepancy_graph(int N)
+{
+   vector<int> prime_list = Primes(0, N);
+   fstream disc_gr;
+   disc_gr.open("discrepancy_data.csv",fstream::out);
+   for (size_t i = 0; i < prime_list.size(); i++)
+   {
+      for (int d = (int)pow(prime_list[i], 0.6); d < prime_list[i] - 1; d++)
+      {
+         if (!Coprime(d, prime_list[i]-1))
+            continue;
+
+         for (int c = 1; c < prime_list[i]; c++)
+         {
+            disc_gr << prime_list[i] << "," << c << "," << d << "," << min_discrepancy(prime_list[i], c, d) << "\n";
+         }
+      }
+      disc_gr.flush();
+   }  
+   disc_gr.close();
+}
+
 int main(int argc, char **argv)
 {   
    if ( argc == 5 )
@@ -108,6 +128,36 @@ int main(int argc, char **argv)
          a [ i - 1 ] = element;  
       }
       cout << discrepancy(a[0], a[1], a[2], a[3]) << endl;
+   }
+   if ( argc == 4 )
+   {
+      int a[ 3 ];  
+      for ( int i = 1;  i < argc;  i++ )
+      {
+         char* p_end;  
+         const long element = std::strtol( argv[ i ], &p_end, 10 );  
+         if ( argv[ i ] == p_end )
+         {
+            fprintf ( stderr, "Usage for min discrepancy for cx^d+x over F_p:  <executable> p(prime) c(coefficient for x^d) d(degree)\n" );  
+            return -1;  
+         }
+         a [ i - 1 ] = element;  
+      }
+      cout << min_discrepancy(a[0], a[1], a[2]) << endl;
+   }
+   else if ( argc == 3 )
+   {
+      int N;  
+
+      char* p_end;  
+      const long element = std::strtol( argv[ 2 ], &p_end, 10 );  
+      if ( argv[ 2 ] == p_end || argv[ 1 ][ 0 ] != 'G')
+      {
+         fprintf ( stderr, "Usage for discrepancy data for cx^d+x over F_p for p up to N:  <executable> 'G' N\n" );  
+         return -1;  
+      }
+      N = element;  
+      discrepancy_graph(N);
    }
    else if ( argc == 2 )
    {
@@ -127,7 +177,7 @@ int main(int argc, char **argv)
    }
    else
    {
-      fprintf ( stderr, "Usage for discrepancy for cx^d+x over F_p:  <executable> p(prime) c(coefficient for x^d) d(degree) m\n" );  
+      fprintf ( stderr, "Usage for discrepancy for cx^d+x over F_p:  <executable> p(prime) c(coefficient for x^d) d(degree) m\nUsage for min discrepancy for cx^d+x over F_p:  <executable> p(prime) c(coefficient for x^d) d(degree)\nUsage for list of discrepancy for cx^d+x over F_p:  <executable> p(prime)\n" );  
       return -1;  
    }
 }

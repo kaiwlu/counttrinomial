@@ -1,3 +1,8 @@
+#include <math.h>
+#include <vector>
+
+using std::vector;
+
 inline int gcd(int a, int b)
 {
    while(b)
@@ -25,6 +30,26 @@ int Pow(int x, int exp, int p)
   int tmp = Pow(x, exp/2, p);
   if (exp % 2 == 0) return (tmp * tmp) % p;
   else return (((x * tmp) % p) * tmp) % p;
+}
+
+// lists primes from min up to n using sieve of Eratosthenes
+vector<int> Primes(int min, int n)
+{
+   vector<bool> numbers(n,true);
+   vector<int> prime_list;
+   int sqrtn = (int)sqrt(n);
+   for (int i = 2; i < n; i++)
+   {
+      if (numbers[i])
+      {
+         if (i >= min)
+            prime_list.push_back(i);
+         if (i <= sqrtn)
+            for (int j = 2; i*j < n; j++)
+               numbers[i*j] = false;
+      } 
+   }
+   return prime_list;
 }
 
 class Mat

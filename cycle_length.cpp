@@ -2,9 +2,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
 #include <string>
-#include <math.h>
 #include <set>
 #include "common.h"
 
@@ -19,25 +17,6 @@ struct Cycle_data
    int cycle_max = 0; // length of longest cycle
 };
 
-// lists primes from min up to n using sieve of Eratosthenes
-vector<int> Primes(int min, int n)
-{
-   vector<bool> numbers(n,true);
-   vector<int> prime_list;
-   int sqrtn = (int)sqrt(n);
-   for (int i = 2; i < n; i++)
-   {
-      if (numbers[i])
-      {
-         if (i >= min)
-            prime_list.push_back(i);
-         if (i <= sqrtn)
-            for (int j = 2; i*j < n; j++)
-               numbers[i*j] = false;
-      } 
-   }
-   return prime_list;
-}
 
 // Returns cycle data for 
 // Trinomials of the form f(x)=a+x+cx^d over F_p

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string>
 #include <fstream>
-#include <vector>
 
 #include "common.h"
 
