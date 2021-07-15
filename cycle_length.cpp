@@ -40,7 +40,7 @@ Cycle_data Trinomial_cycle(int p, int a, int c, int d)
       while (val[j*3+0] == -1)
       {
          pos++;
-         val[j*3+0] = (a + j + c * Pow(j, d, p)) % p;
+         val[j*3+0] = (a + j + Mult(c, Pow(j, d, p), p)) % p;
          val[j*3+1] = pos;
          val[j*3+2] = i;
          j = val[j*3+0];
@@ -137,7 +137,7 @@ void Count_coprime_cycle(int n, int N)
 }
 
 // Input p the prime you want cycle info over
-// Records the individual cycle lengths for pow(p, 0.7) randomly selected trinomials of the form 
+// Records the individual cycle lengths for pow(p, 0.3) randomly selected trinomials of the form 
 // f(x)=a+x+cx^d for every degree d >= pow(p, 0.6) coprime to p-1 over F_p
 // Assuming a = 1 or 0, every cycle appears exactly once
 // csv line format: d, a, c, cycle_len, cycle_len, ..., cycle_len\n
@@ -147,20 +147,24 @@ void Count_large_prime_cycle(int P)
    cycdata.open(to_string(P) + "_cyc_data.csv",fstream::out);
 
    set<int> coeffc;
-   unsigned int coeffsize = (int)pow(P, 0.7) + 2;
+   unsigned int coeffsize = (int)pow(P, 0.3) + 2;
    while (coeffc.size() < coeffsize)
    {
       coeffc.insert(rand() % (P - 2) + 1); // c ranging from 1 to P - 2
    }
-   
+   set<int> expd;
+   while (expd.size() < (unsigned int)pow(P, 0.3) + 2)
+   {
+      expd.insert(rand() % (P - 4) + 3); // d ranging from 3 to P - 2
+   }
    // val is a p*3 2d array
    // val[i][j] is then rewritten as val[i*3+j]
    vector<int> val(P*3, -1);
 
-   for (int d = (int)pow(P, 0.6); d < P - 1; d++)
+   for (int d : expd)
    {
-      if (!Coprime(d, P-1))
-         continue;
+      // if (!Coprime(d, P-1))
+      //    continue;
       for (int a : {0, 1})
          for (int c : coeffc)
          {
@@ -184,7 +188,7 @@ void Count_large_prime_cycle(int P)
                while (val[j*3+0] == -1)
                {
                   pos++;
-                  val[j*3+0] = (a + j + c * Pow(j, d, P)) % P;
+                  val[j*3+0] = (a + j + Mult(c, Pow(j, d, P), P)) % P;
                   val[j*3+1] = pos;
                   val[j*3+2] = i;
                   j = val[j*3+0];
@@ -255,7 +259,7 @@ void Count_a0_valueset(int n, int N)
             int count_valueset = 0;
             for(int j = 0; j < prime_list[i]; j++)
             {
-               int eval = (j + c * Pow(j, d, prime_list[i])) % prime_list[i];
+               int eval = (j + Mult(c, Pow(j, d, prime_list[i]), prime_list[i])) % prime_list[i];
                if (!valueset[eval])
                {
                   count_valueset++;
@@ -302,7 +306,7 @@ void Step_trinomial(int p, int a, int c, int d)
       {
          cout << j << " ";
          pos++;
-         val[j*3+0] = (a + j + c * Pow(j, d, p)) % p;
+         val[j*3+0] = (a + j + Mult(c, Pow(j, d, p), p)) % p;
          val[j*3+1] = pos;
          val[j*3+2] = i;
          j = val[j*3+0];

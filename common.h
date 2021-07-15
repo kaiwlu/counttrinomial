@@ -21,15 +21,42 @@ inline bool Coprime(int a, int b)
    return 1 == gcd(a, b);
 }
 
-// Integer powers (x^exp) mod p for p up to 46340, above that it might overflow
-int Pow(int x, int exp, int p)
+// computes (a * b) % mod
+inline int Mult(int a, int b, int mod)
 {
-  if (exp == 0) return 1;
-  if (exp == 1) return x;
-  
-  int tmp = Pow(x, exp/2, p);
-  if (exp % 2 == 0) return (tmp * tmp) % p;
-  else return (((x * tmp) % p) * tmp) % p;
+   int res = 0; 
+   a = a % mod;
+   if (a == 0) return 0; 
+
+   while (b > 0)
+   {
+      if (b % 2 == 1)
+         res = (res + a) % mod;
+
+      a = (a * 2) % mod;
+      b /= 2;
+   }
+   
+   return res;
+}
+
+// Integer powers (x^exp) mod p for p up to INT_MAX/2, above that it might overflow
+inline int Pow(int x, int exp, int p)
+{
+   int res = 1;
+   x = x % p; 
+   if (x == 0) return 0; 
+
+   while (exp > 0)
+   {
+      if (exp % 2 == 1)
+         res = Mult(res, x, p);
+
+      x = Mult(x, x, p);
+      exp /= 2; 
+   }
+
+   return res;
 }
 
 // lists primes from min up to n using sieve of Eratosthenes
