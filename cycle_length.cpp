@@ -276,6 +276,39 @@ void Count_a0_valueset(int n, int N)
    cycdata.close();
 }
 
+// for p between n and N
+// Records the fraction of value set of f(x)=cx^d+x for all d >= pow(prime_list[i] coprime to p-1
+// for 1<=x<=p-1, lower half = [0, (p-1)/2], upper half = [(p-1)/2+1, p-1]
+// csv line format: p, d, c, lowerhalffraction, upperhalffraction\n
+void Count_a0_valueset_dist(int n, int N)
+{
+   vector<int> prime_list = Primes(n, N);
+   fstream cycdata;
+   cycdata.open("a0_valueset_dist.csv",fstream::out);
+   for (size_t i = 0; i < prime_list.size(); i++)
+   {
+      for (int d = (int)pow(prime_list[i], 0.6); d < prime_list[i] - 1; d++)
+      {
+         if (!Coprime(d, prime_list[i]-1))
+            continue;
+
+         for (int c = 1; c < prime_list[i]; c++)
+         {
+            int count_valueset_lh = 0;
+            for(int j = 1; j < prime_list[i]; j++)
+            {
+               int eval = (j + Mult(c, Pow(j, d, prime_list[i]), prime_list[i])) % prime_list[i];
+               if (eval <= (prime_list[i]-1)/2)
+                  count_valueset_lh++;
+            }
+            cycdata << prime_list[i] << ',' << d << ',' << c << ',' << (double)count_valueset_lh/(double)(prime_list[i]) << ',' << (double)(prime_list[i] - count_valueset_lh)/(double)(prime_list[i]) << '\n';
+         }
+      }
+      cycdata.flush();
+   }
+   cycdata.close();
+}
+
 // Prints the cycle decomposition of polynomial f(x)=a+x+cx^d explicitly 
 // to standard output
 // including numbers leading up to a cycle
@@ -373,13 +406,13 @@ int main(int argc, char **argv)
       
       if ( argv[ 1 ] == p_end )
       {
-         fprintf ( stderr, "Usage for counting polynomials degree coprime to p-1 for p in [Min, N):  <executable> Min N\n" );  
+         fprintf ( stderr, "Usage for finding individual behavior for polynomials degree coprime to p-1 for p in [Min, N):  <executable> Min N\n" );  
          return -1;  
       }
       const long N = std::strtol( argv[ 2 ], &p_end, 10 );  
       if ( argv[ 2 ] == p_end )
       {
-         fprintf ( stderr, "Usage for counting polynomials degree coprime to p-1 for p in [Min, N):  <executable> Min N\n" );  
+         fprintf ( stderr, "Usage for finding individual behavior for polynomials degree coprime to p-1 for p in [Min, N):  <executable> Min N\n" );  
          return -1;  
       }
       Count_coprime_cycle(Min, N);
@@ -390,21 +423,33 @@ int main(int argc, char **argv)
       const long Min = std::strtol( argv[ 2 ], &p_end, 10 );  
       if ( argv[ 2 ] == p_end )
       {
-         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> v Min N\n" );  
+         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\nUsage for counting value set distribution of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'd' Min N\n" );  
          return -1;  
       }
       const long N = std::strtol( argv[ 3 ], &p_end, 10 );  
       if ( argv[ 3 ] == p_end )
       {
-         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\n" );  
+         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\nUsage for counting value set distribution of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'd' Min N\n" );  
          return -1;  
       }
-      Count_a0_valueset(Min, N);
+      if ( *argv[ 1 ] == 'v' )
+      {
+         Count_a0_valueset(Min, N);
+      }
+      else if ( *argv[ 1 ] == 'd' )
+      {
+         Count_a0_valueset_dist(Min, N);
+      }
+      else
+      {
+         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\nUsage for counting value set distribution of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'd' Min N\n" );  
+         return -1; 
+      }
    }
    
    else
    {
-      fprintf ( stderr, "Usage for finding average behavior for p up to N:  <executable> N\nUsage for cycle decomposition for 1 polynomial:  <executable> p(prime) a(constant) c(coefficient for x^d) d(degree)\nUsage for counting polynomials degree coprime to p-1 for p in [Min, N):  <executable> Min N\nUsage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> v Min N\nUsage for counting cycle lengths for cx^d+x+{0,1} in Fp:  <executable> 'p' p\n" );  
+      fprintf ( stderr, "Usage for finding average behavior for p up to N:  <executable> N\nUsage for finding individual behavior for p in [Min, N):  <executable> Min N\nUsage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\nUsage for counting value set distribution of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'd' Min N\nUsage for counting cycle lengths for cx^d+x+{0,1} in Fp:  <executable> 'p' p\nUsage for cycle decomposition for 1 polynomial:  <executable> p(prime) a(constant) c(coefficient for x^d) d(degree)\n" );  
       return -1;  
    }
 }
