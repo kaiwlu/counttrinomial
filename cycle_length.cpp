@@ -280,11 +280,19 @@ void Count_a0_valueset(int n, int N)
 // Records the fraction of value set of f(x)=cx^d+x for all d >= pow(prime_list[i] coprime to p-1
 // for 1<=x<=p-1, lower half = [0, (p-1)/2], upper half = [(p-1)/2+1, p-1]
 // csv line format: p, d, c, lowerhalffraction, upperhalffraction\n
-void Count_a0_valueset_dist(int n, int N)
+void Count_a0_valueset_dist(int n, int N, bool include_0)
 {
    vector<int> prime_list = Primes(n, N);
    fstream cycdata;
-   cycdata.open("a0_valueset_dist.csv",fstream::out);
+   if (include_0)
+   {
+      cycdata.open("a0_valueset_dist.csv", fstream::out);
+   }
+   else
+   {
+      cycdata.open("a0_valueset_dist_n0.csv", fstream::out);
+   }
+   
    for (size_t i = 0; i < prime_list.size(); i++)
    {
       for (int d = (int)pow(prime_list[i], 0.6); d < prime_list[i] - 1; d++)
@@ -294,14 +302,25 @@ void Count_a0_valueset_dist(int n, int N)
 
          for (int c = 1; c < prime_list[i]; c++)
          {
-            int count_valueset_lh = 0;
+            int count_valueset_lh = 0, zeros = 0;
             for(int j = 1; j < prime_list[i]; j++)
             {
                int eval = (j + Mult(c, Pow(j, d, prime_list[i]), prime_list[i])) % prime_list[i];
-               if (eval <= (prime_list[i]-1)/2)
+               if (eval == 0)
+               {
+                  zeros++;
+               }
+               else if (eval <= (prime_list[i]-1)/2)
                   count_valueset_lh++;
             }
-            cycdata << prime_list[i] << ',' << d << ',' << c << ',' << (double)count_valueset_lh/(double)(prime_list[i]) << ',' << (double)(prime_list[i] - count_valueset_lh)/(double)(prime_list[i]) << '\n';
+            if (include_0)
+            {
+               cycdata << prime_list[i] << ',' << d << ',' << c << ',' << (double)(count_valueset_lh + zeros)/(double)(prime_list[i] - 1) << ',' << (double)(prime_list[i] - 1 - count_valueset_lh - zeros)/(double)(prime_list[i] - 1) << '\n';
+            }
+            else
+            {
+               cycdata << prime_list[i] << ',' << d << ',' << c << ',' << (double)(count_valueset_lh)/(double)(prime_list[i] - 1 - zeros) << ',' << (double)(prime_list[i] - 1 - count_valueset_lh - zeros)/(double)(prime_list[i] - 1 - zeros) << '\n';
+            }
          }
       }
       cycdata.flush();
@@ -429,16 +448,20 @@ int main(int argc, char **argv)
       const long N = std::strtol( argv[ 3 ], &p_end, 10 );  
       if ( argv[ 3 ] == p_end )
       {
-         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\nUsage for counting value set distribution of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'd' Min N\n" );  
+         fprintf ( stderr, "Usage for counting value set of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'v' Min N\nUsage for counting value set distribution of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'd' Min N\nUsage for counting value set distribution (excluding 0) of x+cx^d polynomials degree coprime to p-1 for p in [Min, N):  <executable> 'n' Min N\n" );  
          return -1;  
       }
       if ( *argv[ 1 ] == 'v' )
       {
          Count_a0_valueset(Min, N);
       }
+      else if ( *argv[ 1 ] == 'n' )
+      {
+         Count_a0_valueset_dist(Min, N, false);
+      }
       else if ( *argv[ 1 ] == 'd' )
       {
-         Count_a0_valueset_dist(Min, N);
+         Count_a0_valueset_dist(Min, N, true);
       }
       else
       {
