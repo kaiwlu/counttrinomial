@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <queue>
 #include <set>
 #include "common.h"
 
@@ -203,6 +204,89 @@ void Count_large_prime_cycle(int P)
             cycdata << endl;
          }
 
+   }
+   cycdata.close();
+}
+
+// Input p the prime you want cycle info over
+// Records the individual cycle lengths for pow(p, 0.3) randomly selected trinomials of the form 
+// f(x)=1+x+cx^d for random degree d, c such that x+cx^d has more than 1 root
+// csv line format: p, d, c, cycnum, cycle_len, ..., cycle_len\n
+void Count_star_plus1(int M)
+{
+   fstream cycdata;
+   cycdata.open(to_string(M) + "_star_plus1.csv",fstream::out);
+
+   vector<int> plist = Primes(10, M);
+   for(int P : plist)
+   {
+      set<int> expd;
+      while (expd.size() < (unsigned int)pow(P, 0.7) + 2)
+      {
+         expd.insert(rand() % (P - 4) + 3); // d ranging from 3 to P - 2
+      }
+      // val is a p*3 2d array
+      // val[i][j] is then rewritten as val[i*3+j]
+      vector<int> val(P*3, -1);
+
+      for (int d : expd)
+      {
+         set<int> coeffc;
+         int gen = primitive_root(P, M);
+         int baseg = Pow(gen, (P - d), P);
+         for (int i = 0; i < (P - 1)/gcd(P - 1, d - 1); i++)
+         {
+            coeffc.insert(Mult((P - 1), Pow(baseg, i, P), P));
+         }
+         //for (int a : {0, 1})
+            for (int c : coeffc)
+            {
+               queue<int> cyclens;
+               int cycnums = 0;
+
+               cycdata << P << "," << d << ',' << c;
+
+               // val[][0] being -1 means not visited
+               // val[][1] is the position in iteration, needed to calculate cycle length
+               // val[][2] is i, needed to determine if cycle was detected in this iteration
+               for (int i = 0; i < P*3; i++)
+                  val[i] = -1;
+               
+               int j;
+
+               for (int i = 0; i < P; i++)
+               {
+                  if (val[i*3+0] != -1)
+                     continue;
+                  
+                  j = i;
+                  int pos = 0;
+                  while (val[j*3+0] == -1)
+                  {
+                     pos++;
+                     val[j*3+0] = (1 + j + Mult(c, Pow(j, d, P), P)) % P;
+                     val[j*3+1] = pos;
+                     val[j*3+2] = i;
+                     j = val[j*3+0];
+                  }
+                  // if the cycle is detected in this iteration, record its length
+                  if (val[j*3+2] == i)
+                  {
+                     int cyc_len = pos - val[j*3+1] + 1;
+                     cyclens.push(cyc_len);
+                     cycnums++;
+                  }
+               }
+               cycdata << ',' << cycnums;
+               while (!cyclens.empty())
+               {
+                  cycdata << ',' << cyclens.front();
+                  cyclens.pop();
+               }
+               cycdata << endl;
+            }
+
+      }
    }
    cycdata.close();
 }
@@ -423,6 +507,18 @@ int main(int argc, char **argv)
          return 0;
       }
       
+      if ( *argv[ 1 ] == 's' )
+      {
+         const long P = std::strtol( argv[ 2 ], &p_end, 10 );  
+         if ( argv[ 2 ] == p_end )
+         {
+            fprintf ( stderr, "Usage for star shape + 1:  <executable> 's' p\n" );  
+            return -1;  
+         }
+         Count_star_plus1(P);
+         return 0;
+      }
+
       if ( argv[ 1 ] == p_end )
       {
          fprintf ( stderr, "Usage for finding individual behavior for polynomials degree coprime to p-1 for p in [Min, N):  <executable> Min N\n" );  

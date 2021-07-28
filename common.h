@@ -79,6 +79,42 @@ vector<int> Primes(int min, int n)
    return prime_list;
 }
 
+
+int primitive_root(int p, int largest_p)
+{
+   static vector<int> prime_list = Primes(1, largest_p);
+   vector<int> powers;
+   for (size_t i = 0; i < prime_list.size(); i++)
+   {
+      if (prime_list[i] <= p)
+      {
+         if ((p - 1) % prime_list[i] == 0)
+         {
+            powers.push_back((p - 1)/prime_list[i]);
+         }
+      }
+      else
+         break;
+   }
+
+   int gent = -1;
+
+   for (int i = 2; (i < p) && (gent < 0); i++)
+   {
+      gent = i;
+      for (size_t j = 0; j < powers.size(); j++)
+      {
+         if (Pow(i, powers[j], p) == 1)
+         {
+            gent = -1;
+            break;
+         }
+      }
+   }
+   
+   return gent;
+}
+
 class Mat
 {
 private:

@@ -21,6 +21,6 @@ ylabel('size of value set');
 
 figure;
 plot(gcd(val_data(:,1)-1,val_data(:,2)-1),val_data(:,4),'.');
-title('gcd(d-1,p-1) vs size of value set');
+title('#V_f vs gcd(d-1,p-1)');
 xlabel('gcd(d-1,p-1)');
-ylabel('size of value set');
+ylabel('#V_f');
